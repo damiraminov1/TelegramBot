@@ -13,6 +13,12 @@ def welcome(message):
                      'Добро пожаловать, {0.first_name}!\nЯ - {1.first_name}, бот созданный служить тебе.'.format(message.from_user, bot.get_me()))
     parse_mode ='html'
 
+
+@bot.message_handler(commands=['me'])
+def me(message):
+    bot.send_message(message.chat.id, 'Я {0.first_name}!'.format(message.from_user, bot.get_me()))
+
+
 @bot.message_handler(content_types=['text'])
 def answer(message):
     bot.send_message(message.chat.id, message.text)
