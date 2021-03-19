@@ -5,6 +5,8 @@ import random
 import math
 bot = telebot.TeleBot(config.TOKEN)
 
+wait_minutes = False
+name = None
 
 @bot.message_handler(commands=['start', 'help'])
 def welcome(message):
@@ -21,7 +23,21 @@ def welcome(message):
 
 @bot.message_handler(content_types=['text'])
 def main(message):
-    if message.text =='Кубик🎲':
+    global name, wait_minutes
+
+    if wait_minutes and message.text.isdigit():
+        wait_minutes = False
+        if name == 'd':
+            full_name = 'Дамиру'
+            db_name = 'damir'
+        else:
+            full_name = 'Тимуру'
+            db_name = 'timur'
+        minutes = int(message.text)
+        bot.send_message(message.chat.id, 'Хорошо, я записал {} {} минут!'.format(full_name, minutes))
+        add_time(minutes, db_name)
+
+    elif message.text =='Кубик🎲':
         bot.send_message(message.chat.id, str(random.randint(1, 6)))
     elif message.text == 'Дамир':
         markup = types.InlineKeyboardMarkup(row_width=2)
@@ -31,7 +47,8 @@ def main(message):
         time4 = types.InlineKeyboardButton('40 минут', callback_data='40d')
         markup.add(time1, time2, time3, time4)
         bot.send_message(message.chat.id, 'Сколько минут Дамир потратил?', reply_markup=markup)
-
+        name = 'd'
+        wait_minutes = True
     elif message.text == 'Тимур':
         markup = types.InlineKeyboardMarkup(row_width=2)
         time1 = types.InlineKeyboardButton('10 минут', callback_data='10t')
@@ -40,7 +57,8 @@ def main(message):
         time4 = types.InlineKeyboardButton('40 минут', callback_data='40t')
         markup.add(time1, time2, time3, time4)
         bot.send_message(message.chat.id, 'Сколько минут Тимур потратил?', reply_markup=markup)
-
+        name = 't'
+        wait_minutes = True
     elif message.text == 'Обязательства':
         data = open('data.txt')
         numeric_data = str(data.read())
