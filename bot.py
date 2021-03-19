@@ -2,6 +2,7 @@ import telebot
 import config
 from telebot import types
 import random
+import math
 bot = telebot.TeleBot(config.TOKEN)
 
 
@@ -33,7 +34,16 @@ def main(message):
     elif message.text == 'Тимур':
         bot.send_message(message.chat.id, 'Сколько минут Тимур потратил?')
     elif message.text == 'Обязательства':
-        bot.send_message(message.chat.id, 'Пока не умею(')
+        data = open('data.txt')
+        numeric_data = data.read()
+        data.close()
+        if int(numeric_data) > 0:
+            bot.send_message(message.chat.id, 'Дамир должен Тимуру ' + str(numeric_data) + ' минут')
+        elif int(numeric_data) < 0:
+            bot.send_message(message.chat.id, 'Тимур должен Дамиру ' + str(abs(int(numeric_data))) + ' минут')
+        elif int(numeric_data) == 0:
+            bot.send_message(message.chat.id, 'Никто никому ничего не должен!')
+
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call):
