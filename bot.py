@@ -22,11 +22,11 @@ def welcome(message):
 def main(message):
     if message.text =='Кубик🎲':
         bot.send_message(message.chat.id, str(random.randint(1, 6)))
-    if message.text == 'Дамир':
+    elif message.text == 'Дамир':
         bot.send_message(message.chat.id, 'Сколько минут Дамир потратил?')
-    if message.text == 'Тимур':
+    elif message.text == 'Тимур':
         bot.send_message(message.chat.id, 'Сколько минут Тимур потратил?')
-    if message.text == 'Обязательства':
+    elif message.text == 'Обязательства':
         bot.send_message(message.chat.id, 'Пока не умею(')
 
 # RUN
