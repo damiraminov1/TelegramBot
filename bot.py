@@ -2,7 +2,9 @@ import telebot
 import config
 from telebot import types
 import random
-import math
+import os
+
+DATA_FILE_NAME = 'data.txt'
 bot = telebot.TeleBot(config.TOKEN)
 
 wait_minutes = False
@@ -36,7 +38,6 @@ def main(message):
         minutes = int(message.text)
         bot.send_message(message.chat.id, 'Хорошо, я записал {} {} минут!'.format(full_name, minutes))
         add_time(minutes, db_name)
-
     elif message.text =='Кубик🎲':
         bot.send_message(message.chat.id, str(random.randint(1, 6)))
     elif message.text == 'Дамир':
@@ -60,29 +61,33 @@ def main(message):
         name = 't'
         wait_minutes = True
     elif message.text == 'Обязательства':
-        data = open('data.txt')
-        numeric_data = str(data.read())
-        data.close()
-        if int(numeric_data) > 0:
+        numeric_data = read_numeric_data()
+        if numeric_data > 0:
             bot.send_message(message.chat.id, 'Дамир должен Тимуру ' + str(numeric_data) + ' минут')
-        elif int(numeric_data) < 0:
+        elif numeric_data < 0:
             bot.send_message(message.chat.id, 'Тимур должен Дамиру ' + str(abs(int(numeric_data))) + ' минут')
-        elif int(numeric_data) == 0:
+        elif numeric_data == 0:
             bot.send_message(message.chat.id, 'Никто никому ничего не должен!')
 
 def add_time(value, person):
-    data = open('data.txt', 'r')
-    numeric_data = int(str(data.read()))
+    numeric_data = read_numeric_data()
     if person == 'damir':
         numeric_data -= value
     else:
         numeric_data += value
-    data.close()
-    wdata = open('data.txt', 'w')
+    write_numeric_data(numeric_data)
+
+def read_numeric_data():
+    if os.path.isfile(DATA_FILE_NAME):
+        data = open(DATA_FILE_NAME, 'r')
+        return int(str(data.read()))
+    else:
+        return 0
+
+def write_numeric_data(numeric_data):
+    wdata = open(DATA_FILE_NAME, 'w')
     wdata.write(str(numeric_data))
     wdata.close()
-
-
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call):
