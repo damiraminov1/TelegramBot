@@ -10,6 +10,7 @@ bot = telebot.TeleBot(config.TOKEN)
 wait_minutes = False
 name = None
 
+
 @bot.message_handler(commands=['start', 'help'])
 def welcome(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True) # Main Keyboard-menu
@@ -69,6 +70,7 @@ def main(message):
         elif numeric_data == 0:
             bot.send_message(message.chat.id, 'Никто никому ничего не должен!')
 
+
 def add_time(value, person):
     numeric_data = read_numeric_data()
     if person == 'damir':
@@ -84,10 +86,12 @@ def read_numeric_data():
     else:
         return 0
 
+
 def write_numeric_data(numeric_data):
     wdata = open(DATA_FILE_NAME, 'w')
     wdata.write(str(numeric_data))
     wdata.close()
+
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call):
@@ -117,7 +121,7 @@ def callback_inline(call):
             elif call.data == '40t':
                 bot.send_message(call.message.chat.id, 'Хорошо, я записал Тимуру 40 минут!')
                 add_time(40, 'timur')
-
+        bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
     except Exception:
         pass
 
