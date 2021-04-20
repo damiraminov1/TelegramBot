@@ -39,6 +39,7 @@ def main(message):
         minutes = int(message.text)
         bot.send_message(message.chat.id, 'Хорошо, я записал {} {} минут!'.format(full_name, minutes))
         add_time(minutes, db_name)
+
     elif message.text =='Кубик🎲':
         bot.send_message(message.chat.id, str(random.randint(1, 6)))
     elif message.text == 'Дамир':
@@ -96,7 +97,7 @@ def write_numeric_data(numeric_data):
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call):
     try:
-        if call.message:
+        if call.message and wait_minutes:
             if call.data == '10d':
                 bot.send_message(call.message.chat.id, 'Хорошо, я записал Дамиру 10 минут!')
                 add_time(10, 'damir')
