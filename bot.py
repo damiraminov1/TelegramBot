@@ -6,62 +6,37 @@ import os
 
 DATA_FILE_NAME = 'data.txt'
 bot = telebot.TeleBot(config.TOKEN)
-
-wait_minutes = False
+markup = types.ReplyKeyboardMarkup(resize_keyboard=True)  # Main Keyboard-menu
+time_markup_keyboard = types.InlineKeyboardMarkup(row_width=2)  # Time InLine Keyboard
 name = None
+wait_minutes = False
+names = {'damir': 'Дамир', 'timur': 'Тимур'}
+time_str_to_callback_data_dict = {'10 минут': '10', '20 минут': '20', '30 минут': '30', '40 минут': '40'}
 
 
 @bot.message_handler(commands=['start', 'help'])
 def welcome(message):
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True) # Main Keyboard-menu
     damir_button = types.KeyboardButton('Дамир')
     dice_button = types.KeyboardButton('Кубик🎲')
     timur_button = types.KeyboardButton('Тимур')
     stats_button = types.KeyboardButton('Обязательства')
-
     markup.add(damir_button, dice_button, timur_button, stats_button)
-
     bot.send_message(message.chat.id, 'БОТ - РАСПРЕДЕЛИТЕЛЬ ДЕЛ', reply_markup=markup)
 
 
 @bot.message_handler(content_types=['text'])
 def main(message):
     global name, wait_minutes
-
     if wait_minutes and message.text.isdigit():
-        wait_minutes = False
-        if name == 'd':
-            full_name = 'Дамиру'
-            db_name = 'damir'
-        else:
-            full_name = 'Тимуру'
-            db_name = 'timur'
-        minutes = int(message.text)
-        bot.send_message(message.chat.id, 'Хорошо, я записал {} {} минут!'.format(full_name, minutes))
-        add_time(minutes, db_name)
-
+        write_time(message.chat.id, int(message.text))
     elif message.text =='Кубик🎲':
         bot.send_message(message.chat.id, str(random.randint(1, 6)))
     elif message.text == 'Дамир':
-        markup = types.InlineKeyboardMarkup(row_width=2)
-        time1 = types.InlineKeyboardButton('10 минут', callback_data='10d')
-        time2 = types.InlineKeyboardButton('20 минут', callback_data='20d')
-        time3 = types.InlineKeyboardButton('30 минут', callback_data='30d')
-        time4 = types.InlineKeyboardButton('40 минут', callback_data='40d')
-        markup.add(time1, time2, time3, time4)
-        bot.send_message(message.chat.id, 'Сколько минут Дамир потратил?', reply_markup=markup)
-        name = 'd'
-        wait_minutes = True
+        name = 'damir'
+        read_time(message)
     elif message.text == 'Тимур':
-        markup = types.InlineKeyboardMarkup(row_width=2)
-        time1 = types.InlineKeyboardButton('10 минут', callback_data='10t')
-        time2 = types.InlineKeyboardButton('20 минут', callback_data='20t')
-        time3 = types.InlineKeyboardButton('30 минут', callback_data='30t')
-        time4 = types.InlineKeyboardButton('40 минут', callback_data='40t')
-        markup.add(time1, time2, time3, time4)
-        bot.send_message(message.chat.id, 'Сколько минут Тимур потратил?', reply_markup=markup)
-        name = 't'
-        wait_minutes = True
+        name = 'timur'
+        read_time(message)
     elif message.text == 'Обязательства':
         numeric_data = read_numeric_data()
         if numeric_data > 0:
@@ -72,13 +47,47 @@ def main(message):
             bot.send_message(message.chat.id, 'Никто никому ничего не должен!')
 
 
-def add_time(value, person):
+@bot.callback_query_handler(func=lambda call: True)
+def callback_inline(call):
+    if call.message:
+        if call.data in time_str_to_callback_data_dict.values():
+            write_time(call.message.chat.id, call.data)
+
+
+
+def read_time(message):
+    global wait_minutes
+    wait_minutes = True
+    add_time_create_buttons()
+    ask_minutes(message.chat.id)
+
+
+def add_time_create_buttons():
+    global time_markup_keyboard_not_added, time_markup_keyboard, name, time_str_to_callback_data_dict
+    time_markup_keyboard = types.InlineKeyboardMarkup(row_width=2)
+    buttons_time_list = ['time1', 'time2', 'time3', 'time4']
+    for time_str in time_str_to_callback_data_dict:
+        for button in buttons_time_list:
+            button = types.InlineKeyboardButton(time_str, callback_data=time_str_to_callback_data_dict[time_str])
+        time_markup_keyboard.add(button)
+    time_markup_keyboard_not_added = False
+
+
+def ask_minutes(message_chat_id):
+    global name
+    bot.send_message(message_chat_id, 'Сколько времени это заняло у {}?'.format(names[name]+'а'),
+                     reply_markup=time_markup_keyboard)
+
+
+def add_time(value):
+    global name
     numeric_data = read_numeric_data()
-    if person == 'damir':
+    if name == 'damir':
         numeric_data -= value
     else:
         numeric_data += value
     write_numeric_data(numeric_data)
+
 
 def read_numeric_data():
     if os.path.isfile(DATA_FILE_NAME):
@@ -94,37 +103,12 @@ def write_numeric_data(numeric_data):
     wdata.close()
 
 
-@bot.callback_query_handler(func=lambda call: True)
-def callback_inline(call):
-    try:
-        if call.message and wait_minutes:
-            if call.data == '10d':
-                bot.send_message(call.message.chat.id, 'Хорошо, я записал Дамиру 10 минут!')
-                add_time(10, 'damir')
-            elif call.data == '20d':
-                bot.send_message(call.message.chat.id, 'Хорошо, я записал Дамиру 20 минут!')
-                add_time(20, 'damir')
-            elif call.data == '30d':
-                bot.send_message(call.message.chat.id, 'Хорошо, я записал Дамиру 30 минут!')
-                add_time(30, 'damir')
-            elif call.data == '40d':
-                bot.send_message(call.message.chat.id, 'Хорошо, я записал Дамиру 40 минут!')
-                add_time(40, 'damir')
-            elif call.data == '10t':
-                bot.send_message(call.message.chat.id, 'Хорошо, я записал Тимуру 10 минут!')
-                add_time(10, 'timur')
-            elif call.data == '20t':
-                bot.send_message(call.message.chat.id, 'Хорошо, я записал Тимуру 20 минут!')
-                add_time(20, 'timur')
-            elif call.data == '30t':
-                bot.send_message(call.message.chat.id, 'Хорошо, я записал Тимуру 30 минут!')
-                add_time(30, 'timur')
-            elif call.data == '40t':
-                bot.send_message(call.message.chat.id, 'Хорошо, я записал Тимуру 40 минут!')
-                add_time(40, 'timur')
-        bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
-    except Exception:
-        pass
+def write_time(chat_id, minutes):
+    global wait_minutes
+    if wait_minutes:
+        bot.send_message(chat_id, 'Хорошо, я записал {} {} минут!'.format(names[name] + 'у', str(minutes)))
+        add_time(int(str(minutes)))
+        wait_minutes = False
 
 
 # RUN
