@@ -55,7 +55,12 @@ def delete_message(call):
 
 def dice(message):
     global wait_minutes
-    bot.send_message(message.chat.id, str(random.randint(1, 6)))
+    result = random.randint(1, 6)
+    bot.send_message(message.chat.id, 'На кубике выпало: ' + (str(result)))
+    if result in [1, 3, 5]:
+        bot.send_message(message.chat.id, 'Делает {}!'.format(names['timur']))
+    else:
+        bot.send_message(message.chat.id, 'Делает {}!'.format(names['damir']))
     wait_minutes = False
 
 
