@@ -28,7 +28,7 @@ def welcome(message):
 def main(message):
     global name, wait_minutes
     if wait_minutes and message.text.isdigit():
-        write_time(message.chat.id, int(message.text))
+        write_time(message.chat.id, int(message.text), view_data_after_editing=True)
     elif message.text =='Кубик🎲':
         dice(message)
     elif message.text == 'Дамир':
@@ -38,14 +38,14 @@ def main(message):
         name = 'timur'
         read_time(message)
     elif message.text == 'Обязательства':
-        view_data(message)
+        view_data(message.chat.id)
 
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call):
     if call.message:
         if call.data in time_str_to_callback_data_dict.values():
-            write_time(call.message.chat.id, call.data)
+            write_time(call.message.chat.id, call.data, view_data_after_editing=True)
     delete_message(call)
 
 
@@ -59,15 +59,15 @@ def dice(message):
     wait_minutes = False
 
 
-def view_data(message):
+def view_data(message_chat_id):
     global wait_minutes
     numeric_data = read_numeric_data()
     if numeric_data > 0:
-        bot.send_message(message.chat.id, 'Дамир должен Тимуру ' + str(numeric_data) + ' минут')
+        bot.send_message(message_chat_id, 'Дамир должен Тимуру ' + str(numeric_data) + ' минут')
     elif numeric_data < 0:
-        bot.send_message(message.chat.id, 'Тимур должен Дамиру ' + str(abs(int(numeric_data))) + ' минут')
+        bot.send_message(message_chat_id, 'Тимур должен Дамиру ' + str(abs(int(numeric_data))) + ' минут')
     elif numeric_data == 0:
-        bot.send_message(message.chat.id, 'Никто никому ничего не должен!')
+        bot.send_message(message_chat_id, 'Никто никому ничего не должен!')
     wait_minutes = False
 
 
@@ -119,12 +119,14 @@ def write_numeric_data(numeric_data):
     wdata.close()
 
 
-def write_time(chat_id, minutes):
+def write_time(chat_id, minutes, view_data_after_editing=False):
     global wait_minutes
     if wait_minutes:
         bot.send_message(chat_id, 'Хорошо, я записал {} {} минут!'.format(names[name] + 'у', str(minutes)))
         add_time(int(str(minutes)))
         wait_minutes = False
+    if view_data_after_editing:
+        view_data(chat_id)
 
 
 # RUN
