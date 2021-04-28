@@ -69,6 +69,8 @@ def view_data(message_chat_id):
     elif numeric_data == 0:
         bot.send_message(message_chat_id, 'Никто никому ничего не должен!')
     wait_minutes = False
+    if abs(int(numeric_data)) >= 60:
+        bot.send_message(message_chat_id, 'Внимание! Достигнут предел долга 60 минут. Да здравствует власть!')
 
 
 def read_time(message):
