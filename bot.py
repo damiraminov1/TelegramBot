@@ -30,7 +30,7 @@ def main(message):
     if wait_minutes and message.text.isdigit():
         write_time(message.chat.id, int(message.text))
     elif message.text =='Кубик🎲':
-        bot.send_message(message.chat.id, str(random.randint(1, 6)))
+        dice(message)
     elif message.text == 'Дамир':
         name = 'damir'
         read_time(message)
@@ -38,13 +38,7 @@ def main(message):
         name = 'timur'
         read_time(message)
     elif message.text == 'Обязательства':
-        numeric_data = read_numeric_data()
-        if numeric_data > 0:
-            bot.send_message(message.chat.id, 'Дамир должен Тимуру ' + str(numeric_data) + ' минут')
-        elif numeric_data < 0:
-            bot.send_message(message.chat.id, 'Тимур должен Дамиру ' + str(abs(int(numeric_data))) + ' минут')
-        elif numeric_data == 0:
-            bot.send_message(message.chat.id, 'Никто никому ничего не должен!')
+        view_data(message)
 
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -52,7 +46,29 @@ def callback_inline(call):
     if call.message:
         if call.data in time_str_to_callback_data_dict.values():
             write_time(call.message.chat.id, call.data)
+    delete_message(call)
 
+
+def delete_message(call):
+    bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
+
+
+def dice(message):
+    global wait_minutes
+    bot.send_message(message.chat.id, str(random.randint(1, 6)))
+    wait_minutes = False
+
+
+def view_data(message):
+    global wait_minutes
+    numeric_data = read_numeric_data()
+    if numeric_data > 0:
+        bot.send_message(message.chat.id, 'Дамир должен Тимуру ' + str(numeric_data) + ' минут')
+    elif numeric_data < 0:
+        bot.send_message(message.chat.id, 'Тимур должен Дамиру ' + str(abs(int(numeric_data))) + ' минут')
+    elif numeric_data == 0:
+        bot.send_message(message.chat.id, 'Никто никому ничего не должен!')
+    wait_minutes = False
 
 
 def read_time(message):
