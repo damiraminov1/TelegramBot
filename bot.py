@@ -4,14 +4,15 @@ from telebot import types
 import random
 import os
 
+NAMES = {'damir': 'Дамир', 'timur': 'Тимур'}
 DATA_FILE_NAME = 'data.txt'
+TIME_STR_TO_CALLBACK_DATA_DICT = {'10 минут': '10', '20 минут': '20', '30 минут': '30', '40 минут': '40'}
+
 bot = telebot.TeleBot(config.TOKEN)
 markup = types.ReplyKeyboardMarkup(resize_keyboard=True)  # Main Keyboard-menu
 time_markup_keyboard = types.InlineKeyboardMarkup(row_width=2)  # Time InLine Keyboard
 name = None
 wait_minutes = False
-names = {'damir': 'Дамир', 'timur': 'Тимур'}
-time_str_to_callback_data_dict = {'10 минут': '10', '20 минут': '20', '30 минут': '30', '40 минут': '40'}
 
 
 @bot.message_handler(commands=['start', 'help'])
@@ -44,7 +45,7 @@ def main(message):
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call):
     if call.message:
-        if call.data in time_str_to_callback_data_dict.values():
+        if call.data in TIME_STR_TO_CALLBACK_DATA_DICT.values():
             write_time(call.message.chat.id, call.data, view_data_after_editing=True)
     delete_message(call)
 
@@ -58,9 +59,9 @@ def dice(message):
     result = random.randint(1, 6)
     bot.send_message(message.chat.id, 'На кубике выпало: ' + (str(result)))
     if result in [1, 3, 5]:
-        bot.send_message(message.chat.id, 'Делает {}!'.format(names['timur']))
+        bot.send_message(message.chat.id, 'Делает {}!'.format(NAMES['timur']))
     else:
-        bot.send_message(message.chat.id, 'Делает {}!'.format(names['damir']))
+        bot.send_message(message.chat.id, 'Делает {}!'.format(NAMES['damir']))
     wait_minutes = False
 
 
@@ -86,19 +87,17 @@ def read_time(message):
 
 
 def add_time_create_buttons():
-    global time_markup_keyboard_not_added, time_markup_keyboard, name, time_str_to_callback_data_dict
+    global time_markup_keyboard_not_added, time_markup_keyboard, name, TIME_STR_TO_CALLBACK_DATA_DICT
     time_markup_keyboard = types.InlineKeyboardMarkup(row_width=2)
-    buttons_time_list = ['time1', 'time2', 'time3', 'time4']
-    for time_str in time_str_to_callback_data_dict:
-        for button in buttons_time_list:
-            button = types.InlineKeyboardButton(time_str, callback_data=time_str_to_callback_data_dict[time_str])
+    for time_str in TIME_STR_TO_CALLBACK_DATA_DICT:
+        button = types.InlineKeyboardButton(time_str, callback_data=TIME_STR_TO_CALLBACK_DATA_DICT[time_str])
         time_markup_keyboard.add(button)
     time_markup_keyboard_not_added = False
 
 
 def ask_minutes(message_chat_id):
     global name
-    bot.send_message(message_chat_id, 'Сколько времени это заняло у {}?'.format(names[name]+'а'),
+    bot.send_message(message_chat_id, 'Сколько времени это заняло у {}?'.format(NAMES[name] + 'а'),
                      reply_markup=time_markup_keyboard)
 
 
@@ -129,7 +128,7 @@ def write_numeric_data(numeric_data):
 def write_time(chat_id, minutes, view_data_after_editing=False):
     global wait_minutes
     if wait_minutes:
-        bot.send_message(chat_id, 'Хорошо, я записал {} {} минут!'.format(names[name] + 'у', str(minutes)))
+        bot.send_message(chat_id, 'Хорошо, я записал {} {} минут!'.format(NAMES[name] + 'у', str(minutes)))
         add_time(int(str(minutes)))
         wait_minutes = False
     if view_data_after_editing:
