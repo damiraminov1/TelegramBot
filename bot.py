@@ -9,14 +9,13 @@ DATA_FILE_NAME = 'data.txt'
 TIME_STR_TO_CALLBACK_DATA_DICT = {'10 минут': '10', '20 минут': '20', '30 минут': '30', '40 минут': '40'}
 
 bot = telebot.TeleBot(config.TOKEN)
-markup = types.ReplyKeyboardMarkup(resize_keyboard=True)  # Main Keyboard-menu
-time_markup_keyboard = types.InlineKeyboardMarkup(row_width=2)  # Time InLine Keyboard
 name = None
 wait_minutes = False
 
 
 @bot.message_handler(commands=['start', 'help'])
 def welcome(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True) # Main Keyboard-menu
     damir_button = types.KeyboardButton('Дамир')
     dice_button = types.KeyboardButton('Кубик🎲')
     timur_button = types.KeyboardButton('Тимур')
@@ -28,9 +27,7 @@ def welcome(message):
 @bot.message_handler(content_types=['text'])
 def main(message):
     global name, wait_minutes
-    if wait_minutes and message.text.isdigit():
-        write_time(message.chat.id, int(message.text), view_data_after_editing=True)
-    elif message.text =='Кубик🎲':
+    if message.text =='Кубик🎲':
         dice(message)
     elif message.text == 'Дамир':
         name = 'damir'
@@ -40,6 +37,8 @@ def main(message):
         read_time(message)
     elif message.text == 'Обязательства':
         view_data(message.chat.id)
+    elif wait_minutes and message.text.isdigit():
+        write_time(message.chat.id, int(message.text), view_data_after_editing=True)
 
 
 @bot.callback_query_handler(func=lambda call: True)
