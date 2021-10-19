@@ -6,7 +6,7 @@ import os
 
 NAMES = {'damir': 'Дамир', 'timur': 'Тимур'}
 DATA_FILE_NAME = 'data.txt'
-TIME_STR_TO_CALLBACK_DATA_DICT = {'10 минут': '10', '20 минут': '20', '30 минут': '30', '40 минут': '40'}
+TIME_STR_TO_CALLBACK_DATA_DICT = {'5 минут': '5', '10 минут': '10', '20 минут': '20', '30 минут': '30'}
 
 bot = telebot.TeleBot(config.TOKEN)
 name = None
