@@ -57,7 +57,7 @@ def dice(message):
     global wait_minutes
     result = random.randint(1, 6)
     bot.send_message(message.chat.id, 'На кубике выпало: ' + (str(result)))
-    if result in [1, 3, 5]:
+    if result in [2, 4, 6]:
         bot.send_message(message.chat.id, 'Делает {}!'.format(NAMES['timur']))
     else:
         bot.send_message(message.chat.id, 'Делает {}!'.format(NAMES['damir']))
