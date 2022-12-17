@@ -1,5 +1,5 @@
 import telebot
-import config
+from config import Config
 from telebot import types
 import random
 import os
@@ -8,7 +8,7 @@ NAMES = {'damir': 'Дамир', 'timur': 'Тимур'}
 DATA_FILE_NAME = 'data.txt'
 TIME_STR_TO_CALLBACK_DATA_DICT = {'5 минут': '5', '10 минут': '10', '20 минут': '20', '30 минут': '30', 'Отмена': '0'}
 
-bot = telebot.TeleBot(config.TOKEN)
+bot = telebot.TeleBot(Config.TELEGRAM_BOT_TOKEN)
 name = None
 wait_minutes = False
 

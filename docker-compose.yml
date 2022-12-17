@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  server:
+    build: .
+    restart: on-failure
+    container_name: "dice_telegram_bot"
+    command: python bot.py
+    volumes:
+      - .:/dice_telegram_bot
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
